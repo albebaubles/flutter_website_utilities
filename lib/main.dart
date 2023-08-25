@@ -29,7 +29,9 @@ class WebUtitilitiesMain extends StatefulWidget {
 }
 
 class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
-  final TextEditingController _jsonController = TextEditingController(text: '[{"framework": "Flutter","language": "Dart","author": "Albebaubles"}]');
+  final TextEditingController _jsonController = TextEditingController(
+      text:
+          '[{"framework": "Flutter","language": "Dart","author": "Albebaubles"}]');
   var formatter = NumberFormat('#,###,##0');
 
   String _formattedJson = '';
@@ -37,6 +39,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   String _size = '0';
   String _titleText = 'JSON Formatter';
   var _isVertical = true;
+  int _selectedIndex = 0;
 
   void _formatPrettyJson() {
     final inputJson = _jsonController.text;
@@ -86,15 +89,21 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     _jsonController.clear();
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
           title: Text(_titleText),
-          leading: IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.menu),
-          ),
+          // leading: IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(Icons.menu),
+          // ),
           actions: [
             IconButton(
               icon: const Icon(Icons.vertical_split, color: Colors.white),
@@ -109,6 +118,43 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
                 }),
             const SizedBox(width: 16),
           ]),
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blueGrey,
+              ),
+              child: Text('Utilities'),
+            ),
+            ListTile(
+              title: const Text('JSON'),
+              selected: _selectedIndex == 0,
+              onTap: () {
+                // Update the state of the app
+                // _onItemTapped(0);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('XML'),
+              selected: _selectedIndex == 1,
+              onTap: () {
+                // Update the state of the app
+                // _onItemTapped(1);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Padding(
