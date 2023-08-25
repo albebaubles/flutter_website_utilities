@@ -13,9 +13,9 @@ class WebUtilitiesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'JSON Utility',
+      title: 'Web Utilities',
       theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
+        primarySwatch: Colors.deepPurple,
       ),
       home: const WebUtitilitiesMain(),
     );
@@ -32,12 +32,14 @@ class WebUtitilitiesMain extends StatefulWidget {
 
 class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   final TextEditingController _jsonController = TextEditingController();
-  var formatter = NumberFormat('#,###,000');
+  var formatter = NumberFormat('#,###,##0');
 
   String _formattedJson = '';
   String _errorText = '';
-  String _size = '';
+  String _size = '0';
+  String _titleText = 'JSON Formatter';
   var _isVertical = true;
+
   void _formatPrettyJson() {
     final inputJson = _jsonController.text;
     try {
@@ -91,18 +93,18 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('JSON Formatter'),
+          title: Text(_titleText),
           leading: IconButton(
             onPressed: () {},
             icon: const Icon(Icons.menu),
           ),
           actions: [
             IconButton(
-                icon: const Icon(Icons.vertical_split, color: Colors.white),
-                onPressed: () {
-                  _isVertical = true;
-                },
-                ),
+              icon: const Icon(Icons.vertical_split, color: Colors.white),
+              onPressed: () {
+                _isVertical = true;
+              },
+            ),
             IconButton(
                 icon: const Icon(Icons.horizontal_split, color: Colors.white),
                 onPressed: () {
@@ -166,7 +168,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             ),
           ),
           Container(
-            color: Colors.blueGrey,
+            color: Colors.deepPurple,
             child: Row(
               children: [
                 const Spacer(),
