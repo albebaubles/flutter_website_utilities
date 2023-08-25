@@ -14,9 +14,7 @@ class WebUtilitiesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Web Utilities',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blueGrey),
       home: const WebUtitilitiesMain(),
     );
   }
@@ -31,7 +29,7 @@ class WebUtitilitiesMain extends StatefulWidget {
 }
 
 class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
-  final TextEditingController _jsonController = TextEditingController();
+  final TextEditingController _jsonController = TextEditingController(text: '[{"framework": "Flutter","language": "Dart","author": "Albebaubles"}]');
   var formatter = NumberFormat('#,###,##0');
 
   String _formattedJson = '';
@@ -47,7 +45,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       final formattedJson =
           const JsonEncoder.withIndent('  ').convert(parsedJson);
       _setState(formattedJson,
-          formatter.format(utf8.encode(_formattedJson).length), '');
+          formatter.format(utf8.encode(formattedJson).length), '');
     } catch (e) {
       _setState('', '0', 'Invalid JSON format');
     }
@@ -57,12 +55,11 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     final inputJson = _jsonController.text;
     try {
       final dynamic parsedJson = jsonDecode(inputJson);
-      JsonEncoder encoder = const JsonEncoder();
       var formattedJson = const JsonEncoder.withIndent('').convert(parsedJson);
       formattedJson = formattedJson.replaceAll("\t", "");
       formattedJson = formattedJson.replaceAll("\n", "");
       _setState(formattedJson,
-          formatter.format(utf8.encode(_formattedJson).length), '');
+          formatter.format(utf8.encode(formattedJson).length), '');
     } catch (e) {
       _setState('', '0', 'Invalid JSON format');
     }
@@ -83,7 +80,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   void _clear() {
     setState(() {
       _formattedJson = '';
-      _size = formatter.format(utf8.encode(_formattedJson).length);
+      _size = '0';
       _errorText = '';
     });
     _jsonController.clear();
@@ -168,7 +165,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             ),
           ),
           Container(
-            color: Colors.deepPurple,
+            color: Colors.blueGrey,
             child: Row(
               children: [
                 const Spacer(),
