@@ -39,54 +39,6 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   var _isHorizontal = true;
   final int _selectedIndex = 0;
 
-  void _formatPrettyJson() {
-    final inputJson = _jsonController.text;
-    try {
-      final dynamic parsedJson = jsonDecode(inputJson);
-      final formattedJson =
-          const JsonEncoder.withIndent('  ').convert(parsedJson);
-      _setState(formattedJson,
-          formatter.format(utf8.encode(formattedJson).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid JSON format');
-    }
-  }
-
-  void _formatMiniJson() {
-    final inputJson = _jsonController.text;
-    try {
-      final dynamic parsedJson = jsonDecode(inputJson);
-      var formattedJson = const JsonEncoder.withIndent('').convert(parsedJson);
-      formattedJson = formattedJson.replaceAll("\t", "");
-      formattedJson = formattedJson.replaceAll("\n", "");
-      _setState(formattedJson,
-          formatter.format(utf8.encode(formattedJson).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid JSON format');
-    }
-  }
-
-  void _setState(String formattedString, String size, String errorText) {
-    setState(() {
-      _errorText = errorText;
-      _formattedJson = formattedString;
-      _size = size;
-    });
-  }
-
-  void _copyOutput() {
-    Clipboard.setData(ClipboardData(text: _formattedJson));
-  }
-
-  void _clear() {
-    setState(() {
-      _formattedJson = '';
-      _size = '0';
-      _errorText = '';
-    });
-    _jsonController.clear();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +61,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
           const SizedBox(width: 16),
         ]),
         drawer: _buildDrawer(),
-        body: _isHorizontal ? _buildVerticalJson() : _buildHorizontalJson());
+        body: _isHorizontal ? _buildRowJson() : _buildColumnJson());
   }
 
   Drawer _buildDrawer() {
@@ -122,9 +74,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         padding: EdgeInsets.zero,
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blueGrey,
-            ),
+            decoration: BoxDecoration( color: Colors.blueGrey),
             child: Text('Utilities'),
           ),
           ListTile(
@@ -152,12 +102,11 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     );
   }
 
-  Column _buildVerticalJson() {
+  Column _buildRowJson() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
+        Padding( padding: const EdgeInsets.all(16.0),
           child: TextField(
             controller: _jsonController,
             maxLines: 10,
@@ -172,34 +121,22 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: _formatPrettyJson,
-              child: const Icon(
-                Icons.format_indent_increase_outlined,
-                size: 24.0,
-              ),
+              child: const Icon( Icons.format_indent_increase_outlined, size: 24.0),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: _formatMiniJson,
-              child: const Icon(
-                Icons.format_indent_decrease_sharp,
-                size: 24.0,
-              ),
+              child: const Icon( Icons.format_indent_decrease_sharp, size: 24.0),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: _copyOutput,
-              child: const Icon(
-                Icons.copy_all,
-                size: 24.0,
-              ),
+              child: const Icon(Icons.copy_all,size: 24.0,),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: _clear,
-              child: const Icon(
-                Icons.clear_all,
-                size: 24.0,
-              ),
+              child: const Icon( Icons.clear_all,size: 24.0,),
             ),
             const SizedBox(width: 16),
           ],
@@ -209,9 +146,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
-                _formattedJson,
-              ),
+              child: Text( _formattedJson),
             ),
           ),
         ),
@@ -222,10 +157,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.all(1.0),
-                child: Text(
-                  "$_size bytes",
-                  style: const TextStyle(color: Colors.white),
-                ),
+                child: Text( "$_size bytes", style: const TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 16),
             ],
@@ -236,40 +168,28 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   }
 
   // ignore: non_constant_identifier_names
-  Widget _VerticalActions() {
+  Column _ColumnActions() {
     return Column(
       children: [
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _formatPrettyJson,
-          child: const Icon(
-            Icons.format_indent_increase_sharp,
-            size: 24.0,
-          ),
+          child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _formatMiniJson,
-          child: const Icon(
-            Icons.format_indent_decrease_sharp,
-            size: 24.0,
-          ),
+          child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
         ),
         const Spacer(),
         ElevatedButton(
           onPressed: _copyOutput,
-          child: const Icon(
-            Icons.copy_all,
-            size: 24.0,
-          ),
+          child: const Icon(Icons.copy_all, size: 24.0),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _clear,
-          child: const Icon(
-            Icons.clear_all,
-            size: 24.0,
-          ),
+          child: const Icon( Icons.clear_all, size: 24.0),
         ),
         const SizedBox(height: 16),
         const Spacer(),
@@ -278,7 +198,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     );
   }
 
-  Row _buildHorizontalJson() {
+  Row _buildColumnJson() {
     return Row(
       // crossAxisAlignment: CrossAxisAlignment.stretch,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -297,15 +217,62 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             ),
           ),
         ),
-        Expanded(flex: 1, child: _VerticalActions()),
+        Expanded(flex: 1, child: _ColumnActions()),
         Expanded(
           flex: 5,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(child: Text(_formattedJson)),
-          ),
+          )
         ),
       ],
     );
+  }
+
+    void _formatPrettyJson() {
+    final inputJson = _jsonController.text;
+    try {
+      final dynamic parsedJson = jsonDecode(inputJson);
+      final formattedJson =
+          const JsonEncoder.withIndent('  ').convert(parsedJson);
+      _setState(formattedJson,
+          formatter.format(utf8.encode(formattedJson).length), '');
+    } catch (e) {
+      _setState('', '0', 'Invalid JSON format');
+    }
+  }
+
+  void _formatMiniJson() {
+    final inputJson = _jsonController.text;
+    try {
+      final dynamic parsedJson = jsonDecode(inputJson);
+      var formattedJson = const JsonEncoder.withIndent('').convert(parsedJson);
+      formattedJson = formattedJson.replaceAll("\t", "").replaceAll("\n", "");
+      _setState(formattedJson,
+          formatter.format(utf8.encode(formattedJson).length), '');
+    } catch (e) {
+      _setState('', '0', 'Invalid JSON format');
+    }
+  }
+
+  void _setState(String formattedString, String size, String errorText) {
+    setState(() {
+      _errorText = errorText;
+      _formattedJson = formattedString;
+      _size = size;
+    });
+  }
+
+  void _copyOutput() {
+    Clipboard.setData(ClipboardData(text: _formattedJson));
+  }
+
+  void _clear() {
+    setState(() {
+      _formattedJson = '';
+      _size = '0';
+      _errorText = '';
+    });
+    _jsonController.clear();
   }
 }
