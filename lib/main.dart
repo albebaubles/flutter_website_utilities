@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const WebUtilitiesApp());
-}
+void main() => runApp(const WebUtilitiesApp());
 
 class WebUtilitiesApp extends StatelessWidget {
   const WebUtilitiesApp({super.key});
@@ -37,9 +35,9 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   String _formattedJson = '';
   String _errorText = '';
   String _size = '0';
-  String _titleText = 'JSON Formatter';
-  var _isVertical = true;
-  int _selectedIndex = 0;
+  final String _titleText = 'JSON Formatter';
+  var _isHorizontal = true;
+  final int _selectedIndex = 0;
 
   void _formatPrettyJson() {
     final inputJson = _jsonController.text;
@@ -89,145 +87,225 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     _jsonController.clear();
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text(_titleText),
-          // leading: IconButton(
-          //   onPressed: () {},
-          //   icon: const Icon(Icons.menu),
-          // ),
-          actions: [
-            IconButton(
+        appBar: AppBar(title: Text(_titleText), actions: [
+          IconButton(
+            icon: const Icon(Icons.horizontal_split, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                _isHorizontal = true;
+              });
+            },
+          ),
+          IconButton(
               icon: const Icon(Icons.vertical_split, color: Colors.white),
               onPressed: () {
-                _isVertical = true;
-              },
+                setState(() {
+                  _isHorizontal = false;
+                });
+              }),
+          const SizedBox(width: 16),
+        ]),
+        drawer: _buildDrawer(),
+        body: _isHorizontal ? _buildVerticalJson() : _buildHorizontalJson());
+  }
+
+  Drawer _buildDrawer() {
+    return Drawer(
+      // Add a ListView to the drawer. This ensures the user can scroll
+      // through the options in the drawer if there isn't enough vertical
+      // space to fit everything.
+      child: ListView(
+        // Important: Remove any padding from the ListView.
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blueGrey,
             ),
-            IconButton(
-                icon: const Icon(Icons.horizontal_split, color: Colors.white),
-                onPressed: () {
-                  _isVertical = false;
-                }),
-            const SizedBox(width: 16),
-          ]),
-      drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
+            child: Text('Utilities'),
+          ),
+          ListTile(
+            title: const Text('JSON'),
+            selected: _selectedIndex == 0,
+            onTap: () {
+              // Update the state of the app
+              // _onItemTapped(0);
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('XML'),
+            selected: _selectedIndex == 1,
+            onTap: () {
+              // Update the state of the app
+              // _onItemTapped(1);
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Column _buildVerticalJson() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TextField(
+            controller: _jsonController,
+            maxLines: 10,
+            decoration: InputDecoration(
+              hintText: 'Enter JSON here...',
+              errorText: _errorText.isNotEmpty ? _errorText : null,
+            ),
+          ),
+        ),
+        Row(
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blueGrey,
+            const SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: _formatPrettyJson,
+              child: const Icon(
+                Icons.format_indent_increase_outlined,
+                size: 24.0,
               ),
-              child: Text('Utilities'),
             ),
-            ListTile(
-              title: const Text('JSON'),
-              selected: _selectedIndex == 0,
-              onTap: () {
-                // Update the state of the app
-                // _onItemTapped(0);
-                // Then close the drawer
-                Navigator.pop(context);
-              },
+            const SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: _formatMiniJson,
+              child: const Icon(
+                Icons.format_indent_decrease_sharp,
+                size: 24.0,
+              ),
             ),
-            ListTile(
-              title: const Text('XML'),
-              selected: _selectedIndex == 1,
-              onTap: () {
-                // Update the state of the app
-                // _onItemTapped(1);
-                // Then close the drawer
-                Navigator.pop(context);
-              },
+            const Spacer(),
+            ElevatedButton(
+              onPressed: _copyOutput,
+              child: const Icon(
+                Icons.copy_all,
+                size: 24.0,
+              ),
             ),
+            const SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: _clear,
+              child: const Icon(
+                Icons.clear_all,
+                size: 24.0,
+              ),
+            ),
+            const SizedBox(width: 16),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          Padding(
+        const SizedBox(height: 16),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                _formattedJson,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.blueGrey,
+          child: Row(
+            children: [
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.all(1.0),
+                child: Text(
+                  "$_size bytes",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(width: 16),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ignore: non_constant_identifier_names
+  Widget _VerticalActions() {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: _formatPrettyJson,
+          child: const Icon(
+            Icons.format_indent_increase_sharp,
+            size: 24.0,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: _formatMiniJson,
+          child: const Icon(
+            Icons.format_indent_decrease_sharp,
+            size: 24.0,
+          ),
+        ),
+        const Spacer(),
+        ElevatedButton(
+          onPressed: _copyOutput,
+          child: const Icon(
+            Icons.copy_all,
+            size: 24.0,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: _clear,
+          child: const Icon(
+            Icons.clear_all,
+            size: 24.0,
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Spacer(),
+        const Spacer()
+      ],
+    );
+  }
+
+  Row _buildHorizontalJson() {
+    return Row(
+      // crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          flex: 5,
+          child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _jsonController,
-              maxLines: 10,
+              maxLines: 30,
               decoration: InputDecoration(
                 hintText: 'Enter JSON here...',
                 errorText: _errorText.isNotEmpty ? _errorText : null,
               ),
             ),
           ),
-          Row(
-            children: [
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: _formatPrettyJson,
-                child: const Text('Pretty JSON'),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: _formatMiniJson,
-                child: const Text('Minify JSON'),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: _copyOutput,
-                child: const Icon(
-                  Icons.copy_all,
-                  size: 24.0,
-                ),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: _clear,
-                child: const Icon(
-                  Icons.clear_all,
-                  size: 24.0,
-                ),
-              ),
-              const SizedBox(width: 16),
-            ],
+        ),
+        Expanded(flex: 1, child: _VerticalActions()),
+        Expanded(
+          flex: 5,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(child: Text(_formattedJson)),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  _formattedJson,
-                ),
-              ),
-            ),
-          ),
-          Container(
-            color: Colors.blueGrey,
-            child: Row(
-              children: [
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: Text(
-                    "$_size bytes",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                const SizedBox(width: 16),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
