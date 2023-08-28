@@ -29,7 +29,7 @@ class WebUtitilitiesMain extends StatefulWidget {
 class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   final TextEditingController _jsonController = TextEditingController(
       text:
-          '[{"framework": "Flutter","language": "Dart","author": "Albebaubles"}]');
+          '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]');
   var formatter = NumberFormat('#,###,##0');
 
   String _formattedJson = '';
