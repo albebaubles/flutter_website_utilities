@@ -61,7 +61,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
           const SizedBox(width: 16),
         ]),
         drawer: _buildDrawer(),
-        body: _isHorizontal ? _buildRowJson() : _buildColumnJson());
+        body: _isHorizontal ? _buildRowLayout() : _buildColumnJson());
   }
 
   Drawer _buildDrawer() {
@@ -102,7 +102,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     );
   }
 
-  Column _buildRowJson() {
+  Column _buildRowLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -117,38 +117,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             ),
           ),
         ),
-        Row(
-          children: [
-            const SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: _formatPrettyJson,
-              child:
-                  const Icon(Icons.format_indent_increase_outlined, size: 24.0),
-            ),
-            const SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: _formatMiniJson,
-              child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
-            ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _copyOutput,
-              child: const Icon(
-                Icons.copy_all,
-                size: 24.0,
-              ),
-            ),
-            const SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: _clear,
-              child: const Icon(
-                Icons.clear_all,
-                size: 24.0,
-              ),
-            ),
-            const SizedBox(width: 16),
-          ],
-        ),
+        _ColumnActions(true),
         const SizedBox(height: 16),
         Expanded(
           child: SingleChildScrollView(
@@ -176,49 +145,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     );
   }
 
-  // ignore: non_constant_identifier_names
-  Column _ColumnActions() {
-    return Column(
-      children: [
-        const SizedBox(height: 16),
-        Tooltip(
-          message: 'Format',
-          child: ElevatedButton(
-            onPressed: _formatPrettyJson,
-            child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Tooltip(
-            message: 'Compact',
-            child: ElevatedButton(
-              onPressed: _formatMiniJson,
-              child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
-            )),
-        const Spacer(),
-        Tooltip(
-            message: 'Copy to Clipboard',
-            child: ElevatedButton(
-              onPressed: _copyOutput,
-              child: const Icon(Icons.copy_all, size: 24.0),
-            )),
-        const SizedBox(height: 16),
-        Tooltip(
-            message: 'Clear',
-            child: ElevatedButton(
-              onPressed: _clear,
-              child: const Icon(Icons.clear_all, size: 24.0),
-            )),
-        const SizedBox(height: 16),
-        const Spacer(),
-        const Spacer()
-      ],
-    );
-  }
-
   Row _buildColumnJson() {
     return Row(
-      // crossAxisAlignment: CrossAxisAlignment.stretch,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
@@ -235,7 +163,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             ),
           ),
         ),
-        Expanded(flex: 1, child: _ColumnActions()),
+        Expanded(flex: 1, child: _ColumnActions(false)),
         Expanded(
             flex: 5,
             child: Padding(
@@ -244,6 +172,45 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             )),
       ],
     );
+  }
+
+  // ignore: non_constant_identifier_names
+  Widget _ColumnActions(bool alignVertical) {
+    var buttons = [
+      const SizedBox(width: 16, height: 16),
+      Tooltip(
+        message: 'Format',
+        child: ElevatedButton(
+          onPressed: _formatPrettyJson,
+          child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
+        ),
+      ),
+      const SizedBox(width: 16, height: 16),
+      Tooltip(
+          message: 'Compact',
+          child: ElevatedButton(
+            onPressed: _formatMiniJson,
+            child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
+          )),
+      const Spacer(),
+      Tooltip(
+          message: 'Copy to Clipboard',
+          child: ElevatedButton(
+            onPressed: _copyOutput,
+            child: const Icon(Icons.copy_all, size: 24.0),
+          )),
+      const SizedBox(width: 16, height: 16),
+      Tooltip(
+          message: 'Clear',
+          child: ElevatedButton(
+            onPressed: _clear,
+            child: const Icon(Icons.clear_all, size: 24.0),
+          )),
+      const SizedBox(width: 16, height: 16),
+      const Spacer(),
+      const Spacer()
+    ];
+    return (alignVertical) ? Row(children: buttons) : Column(children: buttons);
   }
 
   void _formatPrettyJson() {
@@ -285,11 +252,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   }
 
   void _clear() {
-    setState(() {
-      _formattedJson = '';
-      _size = '0';
-      _errorText = '';
-    });
+    _setState('', '0', '');
     _jsonController.clear();
   }
 }
