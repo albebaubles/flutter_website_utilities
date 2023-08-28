@@ -74,7 +74,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         padding: EdgeInsets.zero,
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration( color: Colors.blueGrey),
+            decoration: BoxDecoration(color: Colors.blueGrey),
             child: Text('Utilities'),
           ),
           ListTile(
@@ -106,7 +106,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding( padding: const EdgeInsets.all(16.0),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
           child: TextField(
             controller: _jsonController,
             maxLines: 10,
@@ -121,22 +122,29 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: _formatPrettyJson,
-              child: const Icon( Icons.format_indent_increase_outlined, size: 24.0),
+              child:
+                  const Icon(Icons.format_indent_increase_outlined, size: 24.0),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: _formatMiniJson,
-              child: const Icon( Icons.format_indent_decrease_sharp, size: 24.0),
+              child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: _copyOutput,
-              child: const Icon(Icons.copy_all,size: 24.0,),
+              child: const Icon(
+                Icons.copy_all,
+                size: 24.0,
+              ),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: _clear,
-              child: const Icon( Icons.clear_all,size: 24.0,),
+              child: const Icon(
+                Icons.clear_all,
+                size: 24.0,
+              ),
             ),
             const SizedBox(width: 16),
           ],
@@ -146,7 +154,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text( _formattedJson),
+              child: Text(_formattedJson),
             ),
           ),
         ),
@@ -157,7 +165,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.all(1.0),
-                child: Text( "$_size bytes", style: const TextStyle(color: Colors.white)),
+                child: Text("$_size bytes",
+                    style: const TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 16),
             ],
@@ -172,25 +181,34 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     return Column(
       children: [
         const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _formatPrettyJson,
-          child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
+        Tooltip(
+          message: 'Format',
+          child: ElevatedButton(
+            onPressed: _formatPrettyJson,
+            child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
+          ),
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _formatMiniJson,
-          child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
-        ),
+        Tooltip(
+            message: 'Compact',
+            child: ElevatedButton(
+              onPressed: _formatMiniJson,
+              child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
+            )),
         const Spacer(),
-        ElevatedButton(
-          onPressed: _copyOutput,
-          child: const Icon(Icons.copy_all, size: 24.0),
-        ),
+        Tooltip(
+            message: 'Copy to Clipboard',
+            child: ElevatedButton(
+              onPressed: _copyOutput,
+              child: const Icon(Icons.copy_all, size: 24.0),
+            )),
         const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _clear,
-          child: const Icon( Icons.clear_all, size: 24.0),
-        ),
+        Tooltip(
+            message: 'Clear',
+            child: ElevatedButton(
+              onPressed: _clear,
+              child: const Icon(Icons.clear_all, size: 24.0),
+            )),
         const SizedBox(height: 16),
         const Spacer(),
         const Spacer()
@@ -219,17 +237,16 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         ),
         Expanded(flex: 1, child: _ColumnActions()),
         Expanded(
-          flex: 5,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(child: Text(_formattedJson)),
-          )
-        ),
+            flex: 5,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(child: Text(_formattedJson)),
+            )),
       ],
     );
   }
 
-    void _formatPrettyJson() {
+  void _formatPrettyJson() {
     final inputJson = _jsonController.text;
     try {
       final dynamic parsedJson = jsonDecode(inputJson);
