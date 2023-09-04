@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:xml/xml.dart' as xml;
 
 void main() => runApp(const WebUtilitiesApp());
 
@@ -27,24 +28,26 @@ class WebUtitilitiesMain extends StatefulWidget {
 }
 
 class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
-  final TextEditingController _jsonController = TextEditingController(
+  final TextEditingController _textInputController = TextEditingController(
       text:
           '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]');
   var formatter = NumberFormat('#,###,##0');
 
-  String _formattedJson = '';
+  String _formattedText = '';
   String _errorText = '';
   String _size = '0';
-  final String _titleText = 'JSON Formatter';
+  final String _titleText = 'JSON/XML Formatter';
   var _isHorizontal = true;
   final int _selectedIndex = 0;
+  List<bool> _selectedFormat = <bool>[true, false];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: Text(_titleText), actions: [
+ //         _buildToggle(),
           IconButton(
-            icon: const Icon(Icons.horizontal_split, color: Colors.white),
+            icon: Icon(Icons.horizontal_split, color: _isHorizontal ? Colors.yellow : Colors.white),
             onPressed: () {
               setState(() {
                 _isHorizontal = true;
@@ -52,7 +55,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             },
           ),
           IconButton(
-              icon: const Icon(Icons.vertical_split, color: Colors.white),
+              icon: Icon(Icons.vertical_split, color: _isHorizontal ? Colors.white : Colors.yellow),
               onPressed: () {
                 setState(() {
                   _isHorizontal = false;
@@ -60,47 +63,25 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
               }),
           const SizedBox(width: 16),
         ]),
-        drawer: _buildDrawer(),
+        // drawer: _buildDrawer(),
         body: _isHorizontal ? _buildRowLayout() : _buildColumnJson());
   }
 
-  Drawer _buildDrawer() {
-    return Drawer(
-      // Add a ListView to the drawer. This ensures the user can scroll
-      // through the options in the drawer if there isn't enough vertical
-      // space to fit everything.
-      child: ListView(
-        // Important: Remove any padding from the ListView.
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blueGrey),
-            child: Text('Utilities'),
-          ),
-          ListTile(
-            title: const Text('JSON'),
-            selected: _selectedIndex == 0,
-            onTap: () {
-              // Update the state of the app
-              // _onItemTapped(0);
-              // Then close the drawer
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: const Text('XML'),
-            selected: _selectedIndex == 1,
-            onTap: () {
-              // Update the state of the app
-              // _onItemTapped(1);
-              // Then close the drawer
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
+    ToggleButtons _buildToggle() {
+      return ToggleButtons(
+        direction: Axis.horizontal,
+        children: <Widget>[Text("JSON"), Text("XML")],
+        isSelected: _selectedFormat,
+        onPressed: (int index) {
+          setState(() {
+            // The button that is tapped is set to true, and the others to false.
+            // for (int i = 0; i < _selectedFruits.length; i++) {
+            //   _selectedFruits[i] = i == index;
+            // }
+          });
+        },
+      );
+    }
 
   Column _buildRowLayout() {
     return Column(
@@ -109,7 +90,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(
-            controller: _jsonController,
+            controller: _textInputController,
             maxLines: 10,
             decoration: InputDecoration(
               hintText: 'Enter JSON here...',
@@ -123,7 +104,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(_formattedJson),
+              child: Text(_formattedText),
             ),
           ),
         ),
@@ -148,13 +129,13 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   Row _buildColumnJson() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+      children: <Widget>[
         Expanded(
           flex: 5,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
-              controller: _jsonController,
+              controller: _textInputController,
               maxLines: 30,
               decoration: InputDecoration(
                 hintText: 'Enter JSON here...',
@@ -168,8 +149,13 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             flex: 5,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(child: Text(_formattedJson)),
+              child: SingleChildScrollView(child: Text(_formattedText)),
             )),
+        Column(children: [
+          Spacer(),
+          Text("$_size bytes", style: const TextStyle(color: Colors.black)),
+          const SizedBox(width: 16, height: 16),
+        ])
       ],
     );
   }
@@ -214,7 +200,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   }
 
   void _formatPrettyJson() {
-    final inputJson = _jsonController.text;
+    final inputJson = _textInputController.text;
     try {
       final dynamic parsedJson = jsonDecode(inputJson);
       final formattedJson =
@@ -227,7 +213,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   }
 
   void _formatMiniJson() {
-    final inputJson = _jsonController.text;
+    final inputJson = _textInputController.text;
     try {
       final dynamic parsedJson = jsonDecode(inputJson);
       var formattedJson = const JsonEncoder.withIndent('').convert(parsedJson);
@@ -239,20 +225,37 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     }
   }
 
+  void _formatPrettyXml() {
+    final inputXml = _textInputController.text;
+    try {
+      final xmlDocument = xml.XmlDocument.parse(inputXml);
+      final formattedXml = xmlDocument.toXmlString(pretty: true);
+      setState(() {
+        _formattedText = formattedXml;
+        _errorText = '';
+      });
+    } catch (e) {
+      setState(() {
+        _errorText = 'Invalid XML format';
+        _formattedText = '';
+      });
+    }
+  }
+
   void _setState(String formattedString, String size, String errorText) {
     setState(() {
       _errorText = errorText;
-      _formattedJson = formattedString;
+      _formattedText = formattedString;
       _size = size;
     });
   }
 
   void _copyOutput() {
-    Clipboard.setData(ClipboardData(text: _formattedJson));
+    Clipboard.setData(ClipboardData(text: _formattedText));
   }
 
   void _clear() {
     _setState('', '0', '');
-    _jsonController.clear();
+    _textInputController.clear();
   }
 }
