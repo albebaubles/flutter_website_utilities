@@ -31,6 +31,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   final TextEditingController _textInputController = TextEditingController(
       text:
           '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]');
+          // <devutilities><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></devutilities>
   var formatter = NumberFormat('#,###,##0');
 
   String _formattedText = '';
@@ -177,7 +178,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       Tooltip(
           message: 'Compact',
           child: ElevatedButton(
-            onPressed: _formatMiniJson,
+            onPressed:  _selectedFormat[0] == true ? _formatMiniJson : _formatMinifyXml,
             child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
           )),
       const Spacer(),
@@ -232,6 +233,23 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
     try {
       final xmlDocument = xml.XmlDocument.parse(inputXml);
       final formattedXml = xmlDocument.toXmlString(pretty: true);
+      setState(() {
+        _formattedText = formattedXml;
+        _errorText = '';
+      });
+    } catch (e) {
+      setState(() {
+        _errorText = 'Invalid XML format';
+        _formattedText = '';
+      });
+    }
+  }
+
+  void _formatMinifyXml() {
+    final inputXml = _textInputController.text;
+    try {
+      final xmlDocument = xml.XmlDocument.parse(inputXml);
+      final formattedXml = xmlDocument.toXmlString(pretty: false);
       setState(() {
         _formattedText = formattedXml;
         _errorText = '';
