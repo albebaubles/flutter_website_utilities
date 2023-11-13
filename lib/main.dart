@@ -12,7 +12,7 @@ class WebUtilitiesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Web Utilities',
+      title: 'Web-base Dev Utilities',
       theme: ThemeData(primarySwatch: Colors.blueGrey),
       home: const WebUtitilitiesMain(),
     );
