@@ -38,16 +38,17 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   String _size = '0';
   final String _titleText = 'JSON/XML Formatter';
   var _isHorizontal = true;
-  final int _selectedIndex = 0;
   List<bool> _selectedFormat = <bool>[true, false];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: Text(_titleText), actions: [
- //         _buildToggle(),
+          _buildToggle(),
+          const Spacer(),
           IconButton(
-            icon: Icon(Icons.horizontal_split, color: _isHorizontal ? Colors.yellow : Colors.white),
+            icon: Icon(Icons.horizontal_split,
+                color: _isHorizontal ? Colors.yellow : Colors.white),
             onPressed: () {
               setState(() {
                 _isHorizontal = true;
@@ -55,7 +56,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             },
           ),
           IconButton(
-              icon: Icon(Icons.vertical_split, color: _isHorizontal ? Colors.white : Colors.yellow),
+              icon: Icon(Icons.vertical_split,
+                  color: _isHorizontal ? Colors.white : Colors.yellow),
               onPressed: () {
                 setState(() {
                   _isHorizontal = false;
@@ -67,21 +69,21 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         body: _isHorizontal ? _buildRowLayout() : _buildColumnJson());
   }
 
-    ToggleButtons _buildToggle() {
-      return ToggleButtons(
-        direction: Axis.horizontal,
-        children: <Widget>[Text("JSON"), Text("XML")],
-        isSelected: _selectedFormat,
-        onPressed: (int index) {
-          setState(() {
-            // The button that is tapped is set to true, and the others to false.
-            // for (int i = 0; i < _selectedFruits.length; i++) {
-            //   _selectedFruits[i] = i == index;
-            // }
-          });
-        },
-      );
-    }
+  ToggleButtons _buildToggle() {
+    return ToggleButtons(
+      direction: Axis.horizontal,
+      isSelected: _selectedFormat,
+      onPressed: (int index) {
+        setState(() {
+          _selectedFormat = [index == 0, index != 0];
+        });
+      },
+      children: <Widget>[
+        Text("JSON", style: TextStyle(color: _selectedFormat[0] == true ? Colors.yellow : Colors.white)),
+        Text("XML", style: TextStyle(color: _selectedFormat[0] == false ? Colors.yellow : Colors.white))
+      ],
+    );
+  }
 
   Column _buildRowLayout() {
     return Column(
@@ -152,7 +154,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
               child: SingleChildScrollView(child: Text(_formattedText)),
             )),
         Column(children: [
-          Spacer(),
+          const Spacer(),
           Text("$_size bytes", style: const TextStyle(color: Colors.black)),
           const SizedBox(width: 16, height: 16),
         ])
@@ -167,7 +169,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       Tooltip(
         message: 'Format',
         child: ElevatedButton(
-          onPressed: _formatPrettyJson,
+          onPressed: _selectedFormat[0] == true ? _formatPrettyJson : _formatPrettyXml,
           child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
         ),
       ),
