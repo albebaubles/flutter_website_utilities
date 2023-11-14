@@ -12,7 +12,7 @@ class WebUtilitiesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Web-base Dev Utilities',
+      title: 'Dev Utilities',
       theme: ThemeData(primarySwatch: Colors.blueGrey),
       home: const WebUtitilitiesMain(),
     );
@@ -31,13 +31,13 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   final TextEditingController _textInputController = TextEditingController(
       text:
           '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]');
-          // <devutilities><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></devutilities>
+  // <devutilities><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></devutilities>
   var formatter = NumberFormat('#,###,##0');
 
   String _formattedText = '';
   String _errorText = '';
   String _size = '0';
-  final String _titleText = 'JSON/XML Formatter';
+  final String _titleText = 'File Parser Validation';
   var _isHorizontal = true;
   List<bool> _selectedFormat = <bool>[true, false];
 
@@ -80,8 +80,14 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         });
       },
       children: <Widget>[
-        Text("JSON", style: TextStyle(color: _selectedFormat[0] == true ? Colors.yellow : Colors.white)),
-        Text("XML", style: TextStyle(color: _selectedFormat[0] == false ? Colors.yellow : Colors.white))
+        Text("JSON",
+            style: TextStyle(
+                color:
+                    _selectedFormat[0] == true ? Colors.yellow : Colors.white)),
+        Text("XML",
+            style: TextStyle(
+                color:
+                    _selectedFormat[0] == false ? Colors.yellow : Colors.white))
       ],
     );
   }
@@ -101,7 +107,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             ),
           ),
         ),
-        _ColumnActions(true),
+        _columnActions(true),
         const SizedBox(height: 16),
         Expanded(
           child: SingleChildScrollView(
@@ -147,7 +153,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             ),
           ),
         ),
-        Expanded(flex: 1, child: _ColumnActions(false)),
+        Expanded(flex: 1, child: _columnActions(false)),
         Expanded(
             flex: 5,
             child: Padding(
@@ -164,13 +170,14 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   }
 
   // ignore: non_constant_identifier_names
-  Widget _ColumnActions(bool alignVertical) {
+  Widget _columnActions(bool alignVertical) {
     var buttons = [
       const SizedBox(width: 16, height: 16),
       Tooltip(
         message: 'Format',
         child: ElevatedButton(
-          onPressed: _selectedFormat[0] == true ? _formatPrettyJson : _formatPrettyXml,
+          onPressed:
+              _selectedFormat[0] == true ? _formatPrettyJson : _formatPrettyXml,
           child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
         ),
       ),
@@ -178,7 +185,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       Tooltip(
           message: 'Compact',
           child: ElevatedButton(
-            onPressed:  _selectedFormat[0] == true ? _formatMiniJson : _formatMinifyXml,
+            onPressed:
+                _selectedFormat[0] == true ? _formatMiniJson : _formatMinifyXml,
             child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
           )),
       const Spacer(),
@@ -236,6 +244,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       setState(() {
         _formattedText = formattedXml;
         _errorText = '';
+        _setState(formattedXml,
+            formatter.format(utf8.encode(formattedXml).length), '');
       });
     } catch (e) {
       setState(() {
@@ -258,6 +268,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       setState(() {
         _errorText = 'Invalid XML format';
         _formattedText = '';
+        _setState(_formattedText,
+            formatter.format(utf8.encode(_formattedText).length), '');
       });
     }
   }
