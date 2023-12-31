@@ -102,7 +102,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
             controller: _textInputController,
             maxLines: 10,
             decoration: InputDecoration(
-              hintText: 'Enter JSON here...',
+              hintText: 'Enter text to format here...',
               errorText: _errorText.isNotEmpty ? _errorText : null,
             ),
           ),
@@ -147,7 +147,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
               controller: _textInputController,
               maxLines: 30,
               decoration: InputDecoration(
-                hintText: 'Enter JSON here...',
+                hintText: 'Enter text to format here...',
                 errorText: _errorText.isNotEmpty ? _errorText : null,
               ),
             ),
