@@ -28,9 +28,7 @@ class WebUtitilitiesMain extends StatefulWidget {
 }
 
 class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
-  final TextEditingController _textInputController = TextEditingController(
-      text:
-          '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]');
+  TextEditingController _textInputController = TextEditingController();
   // <devutilities><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></devutilities>
   var formatter = NumberFormat('#,###,##0');
 
@@ -77,6 +75,8 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       onPressed: (int index) {
         setState(() {
           _selectedFormat = [index == 0, index != 0];
+          _textInputController.text = (index == 0) ? '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]' : 
+          '<root><row><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></row></root>' ;
         });
       },
       children: <Widget>[
@@ -273,6 +273,34 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
       });
     }
   }
+
+ String jsonToXml(Map<String, dynamic> jsonData, String rootElement) {
+  var builder = xml.XmlBuilder();
+  builder.element(rootElement, nest: () {
+    _mapJsonToXml(jsonData, builder);
+  });
+
+  var xmlDoc = builder.build();
+  return xmlDoc.toXmlString(pretty: true);
+}
+
+void _mapJsonToXml(dynamic json, xml.XmlBuilder builder) {
+  if (json is Map) {
+    json.forEach((key, value) {
+      builder.element(key, nest: () {
+        _mapJsonToXml(value, builder);
+      });
+    });
+  } else if (json is List) {
+    for (var item in json) {
+      builder.element('item', nest: () {
+        _mapJsonToXml(item, builder);
+      });
+    }
+  } else {
+    builder.text(json.toString());
+  }
+} 
 
   void _setState(String formattedString, String size, String errorText) {
     setState(() {
