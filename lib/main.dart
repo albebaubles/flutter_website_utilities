@@ -1,8 +1,12 @@
-import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:xml/xml.dart' as xml;
+import 'watermark.dart';
+import 'colors.dart';
+import 'markup.dart';
 
 void main() => runApp(const WebUtilitiesApp());
 
@@ -13,24 +17,25 @@ class WebUtilitiesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Dev Utilities',
-      theme: ThemeData(primarySwatch: Colors.blueGrey),
-      home: const WebUtitilitiesMain(),
+      theme: ThemeData(primarySwatch: kABMainLight3.toMaterialColor()),
+      home: const WebUtilitiesMain(),
     );
   }
 }
 
-class WebUtitilitiesMain extends StatefulWidget {
-  const WebUtitilitiesMain({super.key});
+class WebUtilitiesMain extends StatefulWidget {
+  const WebUtilitiesMain({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _WebUtitilitiesMainState createState() => _WebUtitilitiesMainState();
+  _WebUtilitiesMainState createState() => _WebUtilitiesMainState();
 }
 
-class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
-  TextEditingController _textInputController = TextEditingController();
-  // <devutilities><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></devutilities>
-  var formatter = NumberFormat('#,###,##0');
+class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
+  final _focusNode = FocusNode();
+  final TextEditingController _textInputController = TextEditingController();
+  final _markup = Markup('');
+  final _formatter = NumberFormat('#,###,##0');
 
   String _formattedText = '';
   String _errorText = '';
@@ -40,97 +45,113 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   List<bool> _selectedFormat = <bool>[true, false];
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text(_titleText), actions: [
-          _buildToggle(),
-          const Spacer(),
-          IconButton(
-            icon: Icon(Icons.horizontal_split,
-                color: _isHorizontal ? Colors.yellow : Colors.white),
-            onPressed: () {
-              setState(() {
-                _isHorizontal = true;
-              });
-            },
-          ),
-          IconButton(
-              icon: Icon(Icons.vertical_split,
-                  color: _isHorizontal ? Colors.white : Colors.yellow),
-              onPressed: () {
-                setState(() {
-                  _isHorizontal = false;
-                });
-              }),
-          const SizedBox(width: 16),
-        ]),
-        // drawer: _buildDrawer(),
-        body: _isHorizontal ? _buildRowLayout() : _buildColumnJson());
+  void initState() {
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _markup.raw = _textInputController.text;
+      }
+    });
+    super.initState();
   }
 
-  ToggleButtons _buildToggle() {
+  @override
+  Widget build(BuildContext context) {
+    return
+      WatermarkLogo(child:
+      Scaffold(
+          appBar: AppBar(
+            title: Text(_titleText),
+            actions: [
+              _formatSelection(),
+              const Spacer(),
+              IconButton(
+                icon: Icon(Icons.horizontal_split,
+                    color: _isHorizontal ? Colors.yellow : Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _isHorizontal = true;
+                  });
+                },
+              ),
+              IconButton(
+                  icon: Icon(Icons.vertical_split,
+                      color: _isHorizontal ? Colors.white : Colors.yellow),
+                  onPressed: () {
+                    setState(() {
+                      _isHorizontal = false;
+                    });
+                  }),
+              const SizedBox(width: 16),
+            ],
+            backgroundColor: kABMain,
+          ),
+          // drawer: _buildDrawer(),
+          body: _isHorizontal ? _buildRowLayout() : _buildColumnJson()
+      ));
+  }
+
+  ToggleButtons _formatSelection() {
     return ToggleButtons(
       direction: Axis.horizontal,
       isSelected: _selectedFormat,
       onPressed: (int index) {
         setState(() {
           _selectedFormat = [index == 0, index != 0];
-          _textInputController.text = (index == 0) ? '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]' : 
-          '<root><row><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></row></root>' ;
+          _textInputController.text = (index == 0)
+              ? '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]'
+              : '<root><row><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></row></root>';
+          _markup.raw = _textInputController.text;
         });
       },
       children: <Widget>[
         Text("JSON",
             style: TextStyle(
                 color:
-                    _selectedFormat[0] == true ? Colors.yellow : Colors.white)),
+                _selectedFormat[0] == true ? Colors.yellow : Colors.white)),
         Text("XML",
             style: TextStyle(
                 color:
-                    _selectedFormat[0] == false ? Colors.yellow : Colors.white))
+                _selectedFormat[0] == false ? Colors.yellow : Colors.white))
       ],
+    );
+  }
+
+  TextField rawText() {
+    return TextField(
+      focusNode: _focusNode,
+      autofocus: true,
+      controller: _textInputController,
+      maxLines: 10,
+      decoration: InputDecoration(
+        hintText: 'Enter text to format here...',
+        errorText: _errorText.isNotEmpty ? _errorText : null,
+      ),
     );
   }
 
   Column _buildRowLayout() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            controller: _textInputController,
-            maxLines: 10,
-            decoration: InputDecoration(
-              hintText: 'Enter text to format here...',
-              errorText: _errorText.isNotEmpty ? _errorText : null,
-            ),
-          ),
-        ),
+        rawText(),
         _columnActions(true),
-        const SizedBox(height: 16),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(_formattedText),
-            ),
-          ),
-        ),
+        Expanded(child: SingleChildScrollView(child: Text(_formattedText))),
         Container(
-          color: Colors.blueGrey,
-          child: Row(
-            children: [
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: Text("$_size bytes",
-                    style: const TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(width: 16),
-            ],
-          ),
-        ),
+            color: kABMainLight2,
+            height: 30,
+            child: Row(
+              children: [
+                const Spacer(),
+                FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text("$_size bytes",
+                      style: const TextStyle(color: Colors.white),
+                      textAlign: TextAlign.end),
+                ),
+                const SizedBox(width: 16)
+              ],
+            ))
       ],
     );
   }
@@ -138,19 +159,13 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   Row _buildColumnJson() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         Expanded(
           flex: 5,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _textInputController,
-              maxLines: 30,
-              decoration: InputDecoration(
-                hintText: 'Enter text to format here...',
-                errorText: _errorText.isNotEmpty ? _errorText : null,
-              ),
-            ),
+            child: rawText(),
           ),
         ),
         Expanded(flex: 1, child: _columnActions(false)),
@@ -161,7 +176,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
               child: SingleChildScrollView(child: Text(_formattedText)),
             )),
         Column(children: [
-          const Spacer(),
+          // const Spacer(),
           Text("$_size bytes", style: const TextStyle(color: Colors.black)),
           const SizedBox(width: 16, height: 16),
         ])
@@ -177,7 +192,7 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         message: 'Format',
         child: ElevatedButton(
           onPressed:
-              _selectedFormat[0] == true ? _formatPrettyJson : _formatPrettyXml,
+          _selectedFormat[0] == true ? _formatPrettyJson : _formatPrettyXml,
           child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
         ),
       ),
@@ -186,10 +201,10 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
           message: 'Compact',
           child: ElevatedButton(
             onPressed:
-                _selectedFormat[0] == true ? _formatMiniJson : _formatMinifyXml,
+            _selectedFormat[0] == true ? _formatMiniJson : _formatMinifyXml,
             child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
           )),
-      const Spacer(),
+      const Spacer(flex: 5),
       Tooltip(
           message: 'Copy to Clipboard',
           child: ElevatedButton(
@@ -211,29 +226,18 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
   }
 
   void _formatPrettyJson() {
-    final inputJson = _textInputController.text;
-    try {
-      final dynamic parsedJson = jsonDecode(inputJson);
-      final formattedJson =
-          const JsonEncoder.withIndent('  ').convert(parsedJson);
-      _setState(formattedJson,
-          formatter.format(utf8.encode(formattedJson).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid JSON format');
-    }
+    final pretty = _markup.prettyJson();
+    _setState(pretty, _formatter.format(utf8
+        .encode(pretty)
+        .length), '');
   }
 
   void _formatMiniJson() {
-    final inputJson = _textInputController.text;
-    try {
-      final dynamic parsedJson = jsonDecode(inputJson);
-      var formattedJson = const JsonEncoder.withIndent('').convert(parsedJson);
-      formattedJson = formattedJson.replaceAll("\t", "").replaceAll("\n", "");
-      _setState(formattedJson,
-          formatter.format(utf8.encode(formattedJson).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid JSON format');
-    }
+    final mini = _markup.miniJson();
+    _setState(mini,
+        _formatter.format(utf8
+            .encode(mini)
+            .length), '');
   }
 
   void _formatPrettyXml() {
@@ -245,7 +249,9 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         _formattedText = formattedXml;
         _errorText = '';
         _setState(formattedXml,
-            formatter.format(utf8.encode(formattedXml).length), '');
+            _formatter.format(utf8
+                .encode(formattedXml)
+                .length), '');
       });
     } catch (e) {
       setState(() {
@@ -269,38 +275,40 @@ class _WebUtitilitiesMainState extends State<WebUtitilitiesMain> {
         _errorText = 'Invalid XML format';
         _formattedText = '';
         _setState(_formattedText,
-            formatter.format(utf8.encode(_formattedText).length), '');
+            _formatter.format(utf8
+                .encode(_formattedText)
+                .length), '');
       });
     }
   }
 
- String jsonToXml(Map<String, dynamic> jsonData, String rootElement) {
-  var builder = xml.XmlBuilder();
-  builder.element(rootElement, nest: () {
-    _mapJsonToXml(jsonData, builder);
-  });
-
-  var xmlDoc = builder.build();
-  return xmlDoc.toXmlString(pretty: true);
-}
-
-void _mapJsonToXml(dynamic json, xml.XmlBuilder builder) {
-  if (json is Map) {
-    json.forEach((key, value) {
-      builder.element(key, nest: () {
-        _mapJsonToXml(value, builder);
-      });
+  String jsonToXml(Map<String, dynamic> jsonData, String rootElement) {
+    var builder = xml.XmlBuilder();
+    builder.element(rootElement, nest: () {
+      _mapJsonToXml(jsonData, builder);
     });
-  } else if (json is List) {
-    for (var item in json) {
-      builder.element('item', nest: () {
-        _mapJsonToXml(item, builder);
-      });
-    }
-  } else {
-    builder.text(json.toString());
+
+    var xmlDoc = builder.buildFragment();
+    return xmlDoc.toXmlString(pretty: true);
   }
-} 
+
+  void _mapJsonToXml(dynamic json, xml.XmlBuilder builder) {
+    if (json is Map) {
+      json.forEach((key, value) {
+        builder.element(key, nest: () {
+          _mapJsonToXml(value, builder);
+        });
+      });
+    } else if (json is List) {
+      for (var item in json) {
+        builder.element('item', nest: () {
+          _mapJsonToXml(item, builder);
+        });
+      }
+    } else {
+      builder.text(json.toString());
+    }
+  }
 
   void _setState(String formattedString, String size, String errorText) {
     setState(() {
