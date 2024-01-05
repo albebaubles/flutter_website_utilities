@@ -15,7 +15,7 @@ class Markup {
       return const JsonEncoder.withIndent('  ')
           .convert(jsonDecode(raw));
     } catch (e) {
-      return '';
+      return '[{"error" : "invalid JSON"}]';
     }
   }
 
@@ -26,27 +26,27 @@ class Markup {
           .replaceAll("\t", "")
           .replaceAll("\n", "");
     } catch (e) {
-      return '';
+      return '[{"error" : "invalid JSON"}]';
     }
   }
 
-  // String prettyXml(String xml) {
-  //   try {
-  //     return xml.XmlDocument.parse(xml)
-  //         .toXmlString(pretty: true);
-  //   } catch (e) {
-  //     return '';
-  //   }
-  // }
-  //
-  // String miniXml(String xml) {
-  //   try {
-  //     return xml.XmlDocument.parse(xml)
-  //         .toXmlString(pretty: false);
-  //   } catch (e) {
-  //     return '';
-  //   }
-  // }
+  String prettyXml() {
+    try {
+      return xml.XmlDocument.parse(raw)
+          .toXmlString(pretty: true);
+    } catch (e) {
+      return '<xml>invalid xml</xml>';
+    }
+  }
+
+  String miniXml() {
+    try {
+      return xml.XmlDocument.parse(raw)
+          .toXmlString(pretty: false);
+    } catch (e) {
+      return '<xml>invalid XML</xml>';
+    }
+  }
 
   String jsonToXml(Map<String, dynamic> jsonData, String rootElement) {
     var builder = xml.XmlBuilder();

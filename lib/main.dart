@@ -63,7 +63,36 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
             title: Text(_titleText),
             actions: [
               _formatSelection(),
-              const Spacer(),
+              Spacer(),
+              Tooltip(
+                message: 'Format',
+                child: ElevatedButton(
+                  onPressed:
+                  _selectedFormat[0] == true ? _formatPrettyJson : _formatPrettyXml,
+                  child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
+                ),
+              ),
+              Tooltip(
+                  message: 'Compact',
+                  child: ElevatedButton(
+                    onPressed:
+                    _selectedFormat[0] == true ? _formatMiniJson : _formatMinifyXml,
+                    child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
+                  )),
+              const SizedBox(width: 8, height: 16),
+              Tooltip(
+                  message: 'Copy to Clipboard',
+                  child: ElevatedButton(
+                    onPressed: _copyOutput,
+                    child: const Icon(Icons.copy_all, size: 24.0),
+                  )),
+              Tooltip(
+                  message: 'Clear',
+                  child: ElevatedButton(
+                    onPressed: _clear,
+                    child: const Icon(Icons.clear_all, size: 24.0),
+                  )),
+              const Spacer(flex: 3),
               IconButton(
                 icon: Icon(Icons.horizontal_split,
                     color: _isHorizontal ? Colors.yellow : Colors.white),
@@ -92,6 +121,7 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
 
   ToggleButtons _formatSelection() {
     return ToggleButtons(
+      color: kABMainLight3,
       direction: Axis.horizontal,
       isSelected: _selectedFormat,
       onPressed: (int index) {
@@ -135,7 +165,6 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         rawText(),
-        _columnActions(true),
         Expanded(child: SingleChildScrollView(child: Text(_formattedText))),
         Container(
             color: kABMainLight2,
@@ -168,7 +197,6 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
             child: rawText(),
           ),
         ),
-        Expanded(flex: 1, child: _columnActions(false)),
         Expanded(
             flex: 5,
             child: Padding(
@@ -182,47 +210,6 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
         ])
       ],
     );
-  }
-
-  // ignore: non_constant_identifier_names
-  Widget _columnActions(bool alignVertical) {
-    var buttons = [
-      const SizedBox(width: 16, height: 16),
-      Tooltip(
-        message: 'Format',
-        child: ElevatedButton(
-          onPressed:
-          _selectedFormat[0] == true ? _formatPrettyJson : _formatPrettyXml,
-          child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
-        ),
-      ),
-      const SizedBox(width: 16, height: 16),
-      Tooltip(
-          message: 'Compact',
-          child: ElevatedButton(
-            onPressed:
-            _selectedFormat[0] == true ? _formatMiniJson : _formatMinifyXml,
-            child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
-          )),
-      const Spacer(flex: 5),
-      Tooltip(
-          message: 'Copy to Clipboard',
-          child: ElevatedButton(
-            onPressed: _copyOutput,
-            child: const Icon(Icons.copy_all, size: 24.0),
-          )),
-      const SizedBox(width: 16, height: 16),
-      Tooltip(
-          message: 'Clear',
-          child: ElevatedButton(
-            onPressed: _clear,
-            child: const Icon(Icons.clear_all, size: 24.0),
-          )),
-      const SizedBox(width: 16, height: 16),
-      const Spacer(),
-      const Spacer()
-    ];
-    return (alignVertical) ? Row(children: buttons) : Column(children: buttons);
   }
 
   void _formatPrettyJson() {
@@ -241,45 +228,19 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
   }
 
   void _formatPrettyXml() {
-    final inputXml = _textInputController.text;
-    try {
-      final xmlDocument = xml.XmlDocument.parse(inputXml);
-      final formattedXml = xmlDocument.toXmlString(pretty: true);
-      setState(() {
-        _formattedText = formattedXml;
-        _errorText = '';
-        _setState(formattedXml,
-            _formatter.format(utf8
-                .encode(formattedXml)
-                .length), '');
-      });
-    } catch (e) {
-      setState(() {
-        _errorText = 'Invalid XML format';
-        _formattedText = '';
-      });
-    }
+    final pretty = _markup.prettyXml();
+    _setState(pretty,
+        _formatter.format(utf8
+            .encode(pretty)
+            .length), '');
   }
 
   void _formatMinifyXml() {
-    final inputXml = _textInputController.text;
-    try {
-      final xmlDocument = xml.XmlDocument.parse(inputXml);
-      final formattedXml = xmlDocument.toXmlString(pretty: false);
-      setState(() {
-        _formattedText = formattedXml;
-        _errorText = '';
-      });
-    } catch (e) {
-      setState(() {
-        _errorText = 'Invalid XML format';
-        _formattedText = '';
-        _setState(_formattedText,
-            _formatter.format(utf8
-                .encode(_formattedText)
-                .length), '');
-      });
-    }
+    final mini = _markup.miniXml();
+    _setState(mini,
+        _formatter.format(utf8
+            .encode(mini)
+            .length), '');
   }
 
   String jsonToXml(Map<String, dynamic> jsonData, String rootElement) {
