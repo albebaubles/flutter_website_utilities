@@ -52,6 +52,7 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
     //     _markup.raw = _textInputController.text.trim();
     //   }
     // });
+    _selectedFormat[0] == true;
     super.initState();
   }
 
