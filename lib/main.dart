@@ -48,7 +48,7 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
   void initState() {
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
-        _markup.raw = _textInputController.text;
+        _markup.raw = _textInputController.text.trim();
       }
     });
     super.initState();
@@ -60,7 +60,7 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
       WatermarkLogo(child:
       Scaffold(
           appBar: AppBar(
-            title: Text(_titleText),
+            title: Text(_titleText.trimLeft().trimRight()),
             actions: [
               _formatSelection(),
               Spacer(),
@@ -130,7 +130,7 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
           _textInputController.text = (index == 0)
               ? '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]'
               : '<root><row><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></row></root>';
-          _markup.raw = _textInputController.text;
+          _markup.raw = _textInputController.text.trim();
         });
       },
       children: <Widget>[

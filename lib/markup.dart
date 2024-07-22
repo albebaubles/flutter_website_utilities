@@ -13,7 +13,7 @@ class Markup {
   String prettyJson() {
     try {
       return const JsonEncoder.withIndent('  ')
-          .convert(jsonDecode(raw));
+          .convert(jsonDecode(raw.trimLeft().trimRight()));
     } catch (e) {
       return '[{"error" : "invalid JSON"}]';
     }
@@ -22,7 +22,7 @@ class Markup {
   String miniJson() {
     try {
       return const JsonEncoder.withIndent('')
-          .convert(jsonDecode(raw))
+          .convert(jsonDecode(raw.trimLeft().trimRight()))
           .replaceAll("\t", "")
           .replaceAll("\n", "");
     } catch (e) {
