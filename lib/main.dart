@@ -46,11 +46,12 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
 
   @override
   void initState() {
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        _markup.raw = _textInputController.text.trim();
-      }
-    });
+    _textInputController.addListener(() { _markup.raw = _textInputController.text.trim(); });
+    // _focusNode.addListener(() {
+    //   if (_focusNode.hasFocus) {
+    //     _markup.raw = _textInputController.text.trim();
+    //   }
+    // });
     super.initState();
   }
 
