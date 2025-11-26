@@ -1,12 +1,12 @@
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart' as xml;
 
-import 'markup.dart';
 import 'colors.dart';
+import 'markup.dart';
 import 'watermark.dart';
 
 void main() => runApp(const WebUtilitiesApp());
@@ -32,8 +32,8 @@ class WebUtilitiesMain extends StatefulWidget {
 }
 
 class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
-  final _focusNode = FocusNode();
   final TextEditingController _textInputController = TextEditingController();
+  final ScrollController _outputScrollController = ScrollController();
   final _markup = Markup('');
   final _formatter = NumberFormat('#,###,##0');
 
@@ -47,15 +47,16 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
   @override
   void initState() {
     super.initState();
+    _textInputController.addListener(_onTextChanged);
+  }
 
-    _textInputController.addListener(() {
-      _markup.raw = _textInputController.text.trim();
-    });
+  void _onTextChanged() {
+    _markup.raw = _textInputController.text.trim();
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    _outputScrollController.dispose();
     _textInputController.dispose();
     super.dispose();
   }
@@ -65,23 +66,23 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
     return WatermarkLogo(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_titleText.trim()),
+          title: Text(_titleText),
           backgroundColor: kABMain,
           actions: [
             _formatSelection(),
-            const SizedBox(width: 8),
+            const Spacer(),
             Tooltip(
               message: 'Format',
               child: ElevatedButton(
                 onPressed: _selectedFormat[0] ? _formatPrettyJson : _formatPrettyXml,
-                child: const Icon(Icons.format_indent_increase_sharp, size: 24.0),
+                child: const Icon(Icons.format_indent_increase_sharp, size: 24),
               ),
             ),
             Tooltip(
               message: 'Compact',
               child: ElevatedButton(
                 onPressed: _selectedFormat[0] ? _formatMiniJson : _formatMinifyXml,
-                child: const Icon(Icons.format_indent_decrease_sharp, size: 24.0),
+                child: const Icon(Icons.format_indent_decrease_sharp, size: 24),
               ),
             ),
             const SizedBox(width: 8),
@@ -89,33 +90,30 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
               message: 'Copy to Clipboard',
               child: ElevatedButton(
                 onPressed: _copyOutput,
-                child: const Icon(Icons.copy_all, size: 24.0),
+                child: const Icon(Icons.copy_all, size: 24),
               ),
             ),
             Tooltip(
               message: 'Clear',
               child: ElevatedButton(
                 onPressed: _clear,
-                child: const Icon(Icons.clear_all, size: 24.0),
+                child: const Icon(Icons.clear_all, size: 24),
               ),
             ),
+            const Spacer(flex: 3),
             IconButton(
-              icon: Icon(Icons.horizontal_split,
-                  color: _isHorizontal ? Colors.yellow : Colors.white),
-              onPressed: () {
-                setState(() {
-                  _isHorizontal = true;
-                });
-              },
+              icon: Icon(
+                Icons.horizontal_split,
+                color: _isHorizontal ? Colors.yellow : Colors.white,
+              ),
+              onPressed: () => setState(() => _isHorizontal = true),
             ),
             IconButton(
-              icon: Icon(Icons.vertical_split,
-                  color: !_isHorizontal ? Colors.yellow : Colors.white),
-              onPressed: () {
-                setState(() {
-                  _isHorizontal = false;
-                });
-              },
+              icon: Icon(
+                Icons.vertical_split,
+                color: !_isHorizontal ? Colors.yellow : Colors.white,
+              ),
+              onPressed: () => setState(() => _isHorizontal = false),
             ),
             const SizedBox(width: 16),
           ],
@@ -128,34 +126,25 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
   ToggleButtons _formatSelection() {
     return ToggleButtons(
       color: kABMainLight3,
-      direction: Axis.horizontal,
       isSelected: _selectedFormat,
-      onPressed: (int index) {
+      onPressed: (index) {
         setState(() {
-          _selectedFormat = [index == 0, index == 1];
-
+          _selectedFormat = [index == 0, index != 0];
           _textInputController.text = index == 0
-              ? '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart", "source" : "https://github.com/albebaubles/flutter_website_utilities"}]'
-              : '<root><row><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language><source>https://github.com/albebaubles/flutter_website_utilities</source></row></root>';
-
+              ? '[{"author": "Albebaubles", "framework": "Flutter", "language": "Dart"}]'
+              : '<root><row><author>Albebaubles</author><framework>Flutter</framework><language>Dart</language></row></root>';
           _markup.raw = _textInputController.text.trim();
         });
       },
       children: [
-        Text("JSON",
-            style: TextStyle(
-                color: _selectedFormat[0] ? Colors.yellow : Colors.white)),
-        Text("XML",
-            style: TextStyle(
-                color: _selectedFormat[1] ? Colors.yellow : Colors.white)),
+        Text("JSON", style: TextStyle(color: _selectedFormat[0] ? Colors.yellow : Colors.white)),
+        Text("XML", style: TextStyle(color: !_selectedFormat[0] ? Colors.yellow : Colors.white)),
       ],
     );
   }
 
-  TextField rawText() {
+  TextField rawTextField() {
     return TextField(
-      focusNode: _focusNode,
-      autofocus: true,
       controller: _textInputController,
       maxLines: null,
       decoration: InputDecoration(
@@ -168,24 +157,33 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
 
   Widget _buildRowLayout() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(child: rawText()),
-        Expanded(child: SingleChildScrollView(child: Text(_formattedText))),
+        Expanded(
+          flex: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: rawTextField(),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Scrollbar(
+            controller: _outputScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _outputScrollController,
+              child: SelectableText(_formattedText),
+            ),
+          ),
+        ),
         Container(
           color: kABMainLight2,
           height: 30,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              FittedBox(
-                fit: BoxFit.contain,
-                child: Text("$_size bytes",
-                    style: const TextStyle(color: Colors.white),
-                    textAlign: TextAlign.end),
-              ),
-              const SizedBox(width: 16),
-            ],
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            '$_size bytes',
+            style: const TextStyle(color: Colors.white),
           ),
         ),
       ],
@@ -195,64 +193,49 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
   Widget _buildColumnLayout() {
     return Row(
       children: [
-        Expanded(flex: 5, child: Padding(padding: const EdgeInsets.all(16), child: rawText())),
         Expanded(
-            flex: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: SingleChildScrollView(child: Text(_formattedText)),
-            )),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: rawTextField(),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Scrollbar(
+              controller: _outputScrollController,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: _outputScrollController,
+                child: SelectableText(_formattedText),
+              ),
+            ),
+          ),
+        ),
         Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text("$_size bytes", style: const TextStyle(color: Colors.black)),
-            const SizedBox(height: 16, width: 16),
+            Text('$_size bytes', style: const TextStyle(color: Colors.black)),
+            const SizedBox(height: 16),
           ],
-        )
+        ),
       ],
     );
   }
 
-  void _formatPrettyJson() {
-    try {
-      final pretty = _markup.prettyJson();
-      _setState(pretty, _formatter.format(utf8.encode(pretty).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid JSON: $e');
-    }
-  }
+  void _formatPrettyJson() => _applyFormatting(_markup.prettyJson());
 
-  void _formatMiniJson() {
-    try {
-      final mini = _markup.miniJson();
-      _setState(mini, _formatter.format(utf8.encode(mini).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid JSON: $e');
-    }
-  }
+  void _formatMiniJson() => _applyFormatting(_markup.miniJson());
 
-  void _formatPrettyXml() {
-    try {
-      final pretty = _markup.prettyXml();
-      _setState(pretty, _formatter.format(utf8.encode(pretty).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid XML: $e');
-    }
-  }
+  void _formatPrettyXml() => _applyFormatting(_markup.prettyXml());
 
-  void _formatMinifyXml() {
-    try {
-      final mini = _markup.miniXml();
-      _setState(mini, _formatter.format(utf8.encode(mini).length), '');
-    } catch (e) {
-      _setState('', '0', 'Invalid XML: $e');
-    }
-  }
+  void _formatMinifyXml() => _applyFormatting(_markup.miniXml());
 
-  void _setState(String formattedString, String size, String errorText) {
+  void _applyFormatting(String formatted) {
     setState(() {
-      _errorText = errorText;
-      _formattedText = formattedString;
-      _size = size;
+      _formattedText = formatted;
+      _errorText = (formatted.contains('invalid') || formatted.contains('error')) ? 'Invalid input' : '';
+      _size = _formatter.format(utf8.encode(formatted).length);
     });
   }
 
@@ -261,7 +244,11 @@ class _WebUtilitiesMainState extends State<WebUtilitiesMain> {
   }
 
   void _clear() {
-    _setState('', '0', '');
     _textInputController.clear();
+    setState(() {
+      _formattedText = '';
+      _errorText = '';
+      _size = '0';
+    });
   }
 }
